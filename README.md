@@ -1,9 +1,9 @@
-# generator-atom-package-typescript
+# @atxm/package-generator
 
-[![npm](https://flat.badgen.net/npm/license/generator-atom-package-typescript)](https://www.npmjs.org/package/generator-atom-package-typescript)
-[![npm](https://flat.badgen.net/npm/v/generator-atom-package-typescript)](https://www.npmjs.org/package/generator-atom-package-typescript)
-[![CircleCI](https://flat.badgen.net/circleci/github/idleberg/generator-atom-package-typescript)](https://circleci.com/gh/idleberg/generator-atom-package-typescript)
-[![David](https://flat.badgen.net/david/dep/idleberg/generator-atom-package-typescript)](https://david-dm.org/idleberg/generator-atom-package-typescript)
+[![npm](https://flat.badgen.net/npm/license/@atxm/package-generator)](https://www.npmjs.org/package/@atxm/package-generator)
+[![npm](https://flat.badgen.net/npm/v/@atxm/package-generator)](https://www.npmjs.org/package/@atxm/package-generator)
+[![CircleCI](https://flat.badgen.net/circleci/github/a-t-x-m/package-generator)](https://circleci.com/gh/a-t-x-m/package-generator)
+[![David](https://flat.badgen.net/david/dep/a-t-x-m/package-generator)](https://david-dm.org/a-t-x-m/package-generator)
 
 ## Description
 
@@ -31,7 +31,7 @@ npm install -g yo
 Use your preferred [Node](https://nodejs.org/) package manager to install the CLI tool
 
 ```sh
-npm i generator-atom-package-typescript -g
+npm i @atxm/package-generator -g
 ```
 
 ## Usage
@@ -52,11 +52,7 @@ yo atom-package-typescript
 
 *“That's all Folks!”*
 
-## Related
-
-- [generator-atom-package-coffeescript](https://www.npmjs.org/package/generator-atom-package-coffeescript)
-- [generator-atom-package-webpack](https://www.npmjs.org/package/generator-atom-package-webpack)
-
 ## License
 
-This work is licensed under the [MIT License](https://opensource.org/licenses/MIT)
+This work is dual-licensed under [The MIT License](https://opensource.org/licenses/MIT) and the [GNU General Public License, version 2.0](https://opensource.org/licenses/GPL-2.0)
+

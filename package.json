@@ -1,5 +1,5 @@
 {
-  "name": "generator-atom-package-typescript",
+  "name": "@atxm/package-generator",
   "version": "0.17.0",
   "description": "Generator for Atom packages written in TypeScript",
   "files": [
@@ -19,10 +19,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/idleberg/generator-atom-package-typescript"
+    "url": "https://github.com/a-t-x-m/package-generator"
   },
   "author": "",
-  "license": "MIT",
+  "license": "MIT OR GPL-2.0",
   "dependencies": {
     "@sindresorhus/slugify": "^0.11.0",
     "axios": "^0.19.2",
