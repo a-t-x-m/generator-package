@@ -1,0 +1,10 @@
+export function helloWorld() {
+  return atom.notifications.addInfo(
+    'Hello World!',
+    {
+      detail: atom.inDevMode()
+        ? 'Package created with JavaScript'
+        : undefined
+    }
+  );
+}

@@ -1,0 +1,28 @@
+import { CompositeDisposable } from 'atom';
+import { helloWorld } from './hello-world';
+
+export { config } from './config';
+
+let subscriptions;
+
+export async function activate() {
+  // Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
+  subscriptions = new CompositeDisposable();
+
+
+
+
+
+  // Register commands
+  subscriptions.add(
+    atom.commands.add('atom-workspace', {
+      "<%= pkg.name %>:hello-world": () => {
+        helloWorld();
+      }
+    })
+  );
+}
+
+export function deactivate() {
+  subscriptions && subscriptions.dispose();
+}

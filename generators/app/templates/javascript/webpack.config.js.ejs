@@ -1,14 +1,10 @@
-//@ts-check
-
 'use strict';
 
 const path = require('path');
 
-/**@type {import('webpack').Configuration}*/
 const config = {
   target: 'node',
-
-  entry: './src/<%= pkg.name %>.ts',
+  entry: './src/<%= pkg.name %>.js',
   output: {
     path: path.resolve(__dirname, 'lib'),
     filename: '<%= pkg.name %>.js',
@@ -21,18 +17,33 @@ const config = {
     electron: 'electron'
   },
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.js', '.jsx']
   },
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: [
           {
-            loader: 'ts-loader'
+            loader: 'babel-loader'
           }
         ]
+      },
+      {
+        test: /\.css$/,
+        use: [
+            'style-loader',
+            'css-loader',
+          ]
+      },
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+            'style-loader',
+            'css-loader',
+            'sass-loader',
+          ]
       }
     ]
   }

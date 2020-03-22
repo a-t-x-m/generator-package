@@ -1,22 +1,33 @@
-# @atxm/package-generator
+# @atxm/generator-package
 
-[![npm](https://flat.badgen.net/npm/license/@atxm/package-generator)](https://www.npmjs.org/package/@atxm/package-generator)
-[![npm](https://flat.badgen.net/npm/v/@atxm/package-generator)](https://www.npmjs.org/package/@atxm/package-generator)
-[![CircleCI](https://flat.badgen.net/circleci/github/a-t-x-m/package-generator)](https://circleci.com/gh/a-t-x-m/package-generator)
-[![David](https://flat.badgen.net/david/dep/a-t-x-m/package-generator)](https://david-dm.org/a-t-x-m/package-generator)
+[![npm](https://flat.badgen.net/npm/license/@atxm/generator-package)](https://www.npmjs.org/package/@atxm/generator-package)
+[![npm](https://flat.badgen.net/npm/v/@atxm/generator-package)](https://www.npmjs.org/package/@atxm/generator-package)
+[![CircleCI](https://flat.badgen.net/circleci/github/a-t-x-m/generator)](https://circleci.com/gh/a-t-x-m/generator)
+[![David](https://flat.badgen.net/david/dep/a-t-x-m/generator)](https://david-dm.org/a-t-x-m/generator)
 
 ## Description
 
-A [Yeoman](http://yeoman.io/authoring/user-interactions.html) generator for Atom packages written in any version of TypeScript.
+A [Yeoman](http://yeoman.io/authoring/user-interactions.html) generator for Atom packages written in JavaScript, TypeScript or CoffeeScript.
 
 **Features**
 
-- adds any [SPDX](https://spdx.org/licenses/) license
-- adds [CircleCI](https://circleci.com) configuration
-- adds [Travis CI](https://travis-ci.org/) configuration
-- adds [ESLint](https://github.com/typescript-eslint/typescript-eslint) configuration
-- adds [stylelint](https://stylelint.io/) configuration
+- scaffolds Atom packages written in JavaScript, TypeScript or CoffeeScript
+- bundles package with Webpack
+- adds linter configurations
+  - [CoffeeLint](https://github.com/clutchski/coffeelint)
+  - [ESLint](https://github.com/typescript-eslint/typescript-eslint)
+  - [stylelint](https://stylelint.io/)
+- adds CI configurations
+  - [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines) (private packages only)
+  - [CircleCI](https://circleci.com)
+  - [GitHub Actions](https://github.com/features/actions) (private packages only)
+  - [Travis CI](https://travis-ci.org/)
 - adds [Atom package dependencies](https://www.npmjs.com/package/atom-package-deps)
+- adds any [SPDX](https://spdx.org/licenses/) license
+- adds development scripts
+- adds `activationHooks` / `activationCommands`
+- supports Babel presets
+- links development packages
 
 ## Prerequisites
 
@@ -31,7 +42,7 @@ npm install -g yo
 Use your preferred [Node](https://nodejs.org/) package manager to install the CLI tool
 
 ```sh
-npm i @atxm/package-generator -g
+npm i @atxm/generator-package -g
 ```
 
 ## Usage
@@ -47,7 +58,7 @@ cd my-package
 Next, run the generator and follow its instructions. Use `--help`to list available flags.
 
 ```sh
-yo atom-package-typescript
+yo @atxm/package
 ```
 
 *“That's all Folks!”*

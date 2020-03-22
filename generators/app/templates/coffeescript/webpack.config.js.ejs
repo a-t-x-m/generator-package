@@ -1,0 +1,52 @@
+'use strict';
+
+const path = require('path');
+
+const config = {
+  target: 'node',
+
+  entry: './src/<%= pkg.name %>.coffee',
+  output: {
+    path: path.resolve(__dirname, 'lib'),
+    filename: '<%= pkg.name %>.js',
+    libraryTarget: 'commonjs2',
+    devtoolModuleFilenameTemplate: '../[resource-path]'
+  },
+  devtool: 'source-map',
+  externals: {
+    atom: 'atom',
+    electron: 'electron'
+  },
+  resolve: {
+    extensions: ['.coffee', '.js']
+  },
+  module: {
+    rules: [
+      {
+        test: /\.coffee$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'coffee-loader'
+          }
+        ]
+      },
+      {
+        test: /\.css$/,
+        use: [
+            'style-loader',
+            'css-loader',
+          ]
+      },
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+            'style-loader',
+            'css-loader',
+            'sass-loader',
+          ]
+      }
+    ]
+  }
+};
+module.exports = config;

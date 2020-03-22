@@ -1,28 +1,25 @@
 const Generator = require('yeoman-generator');
 const meta = require('../../package.json');
 
-const axios = require('axios');
+const { join } = require('path');
+const { pascalCase } = require('pascal-case');
 const mkdirp = require('mkdirp');
 const slugify = require('@sindresorhus/slugify');
 const spdxLicenseList = require('spdx-license-list/full');
 const terminalLink = require('terminal-link');
 const updateNotifier = require('update-notifier');
 const yosay = require('yosay');
-const { join } = require('path');
 
-// Create array of license choices
-const spdxCodes = Object.getOwnPropertyNames(spdxLicenseList).sort();
-const licenseChoices = spdxCodes.map(obj => {
-  const licenses = {};
-  licenses['name'] = terminalLink(obj, `https://spdx.org/licenses/${obj}.html`, {
-    fallback() {
-      return obj;
-    }
-  });
-  licenses['value'] = obj;
+const {
+  composeBabel,
+  composeManifest,
+  getLicenses,
+  getDependencies,
+  getDestinationPath,
+  getTemplatePath
+} = require('../../lib/helpers');
 
-  return licenses;
-});
+const validators = require('../../lib/validators');
 
 // Is there a newer version of this generator?
 updateNotifier({ pkg: meta }).notify();
@@ -36,18 +33,29 @@ module.exports = class extends Generator {
       'allow-atom-prefix',
       {
         desc: `Allows naming the package with "atom-" prefix`,
-        default: false,
+        default: true,
         type: Boolean
       }
     );
+
+    this.option(
+      'ignore-scope-warning',
+      {
+        desc: `Ignores scope warning`,
+        default: true,
+        type: Boolean
+      }
+    );
+
     this.option(
       'allow-empty-description',
       {
-        desc: `Allows empty packag description`,
+        desc: `Allows empty package description`,
         default: false,
         type: Boolean
       }
     );
+
     this.option(
       'clear',
       {
@@ -56,6 +64,7 @@ module.exports = class extends Generator {
         type: Boolean
       }
     );
+
     this.option(
       'debug',
       {
@@ -64,41 +73,55 @@ module.exports = class extends Generator {
         type: Boolean
       }
     );
-
-    this.allowAtomPrefix = (this.options.allowAtomPrefix ? true : false);
-    this.allowEmptyDescription = (this.options.allowEmptyDescription ? true : false);
-    this.clear = (this.options.clear ? true : false);
-    this.debugMode = (this.options.debug ? true : false);
   }
 
-  inquirer() {
-    if (this.clear) console.clear();
-    console.log(yosay('Let me help you build an Atom package'));
+  linkify(label, url) {
+    return terminalLink(label, url, {
+      fallback() {
+        return label;
+      }
+    })
+  }
+
+  async inquirer() {
+    if (this.options.clear) console.clear();
+    console.log(yosay('Let\'s go & build a package for Atom!'));
 
     return this.prompt([
+      {
+        type: 'list',
+        name: 'language',
+        message: 'Choose your preferred language',
+        default: 'typescript',
+        store: true,
+        choices: [
+          {
+            name: this.linkify('CoffeeScript', 'https://coffeescript.org'),
+            value: 'coffeescript'
+          },
+          {
+            name: this.linkify('JavaScript', 'https://developer.mozilla.org/en-US/docs/Web/JavaScript'),
+            value: 'javascript'
+          },
+          {
+            name: this.linkify('TypeScript', 'https://www.typescriptlang.org'),
+            value: 'typescript'
+          }
+        ],
+      },
       {
         name: 'name',
         message: 'What do you want to name your package?',
         default: slugify(this.appname),
         store: true,
-        validate: (str) => {
-          if (str.startsWith('atom-') && this.allowAtomPrefix === false) {
-            return 'Your package name shouldn\'t be prefixed with "atom-"';
-          } else if (str.length > 214) {
-            return 'The name must be less than or equal to 214 characters';
-          }
-
-          return true;
-        }
+        validate: str => validators.name(str, this.options)
       },
       {
         name: 'description',
         message: 'What is your package description?',
         default: '',
         store: true,
-        validate: (str) => {
-          return (str.length === 0 && this.allowEmptyDescription === false) ? 'Please provide a short description for your package' : true;
-        }
+        validate: str => validators.description(str, this.options)
       },
       {
         name: 'author',
@@ -115,8 +138,15 @@ module.exports = class extends Generator {
           return username;
         },
         store: true,
-        validate: x => x.length > 0 ? true : 'You have to provide a username',
+        validate: str => validators.user(str),
         when: () => !this.options.org
+      },
+      {
+        type: 'confirm',
+        name: 'private',
+        message: 'Is this a private package?',
+        store: true,
+        default: false,
       },
       {
         type: 'list',
@@ -124,8 +154,9 @@ module.exports = class extends Generator {
         message: 'Choose a license',
         default: 'MIT',
         store: true,
-        choices: licenseChoices,
+        choices: getLicenses,
       },
+
       {
         type: 'checkbox',
         name: 'features',
@@ -193,14 +224,14 @@ module.exports = class extends Generator {
         message: 'Activation Hooks: Specify root scope used',
         store: true,
         when: answers => answers.activationHooks.includes('root-scope-used'),
-        validate: str => str.endsWith(':root-scope-used') && str.length > ':root-scope-used'.length ? true : 'You need to specify a valid root scope'
+        validate: str => validators.rootScope(str)
       },
       {
         name: 'grammarUsed',
         message: 'Activation Hooks: Specify grammar used',
         store: true,
         when: answers => answers.activationHooks.includes('grammar-used'),
-        validate: str => str.startsWith('language-') && str.length > 'language-'.length ? true : 'You need to specify a valid language package'
+        validate: str => validators.grammar(str)
       },
       {
         type: 'confirm',
@@ -214,21 +245,7 @@ module.exports = class extends Generator {
         message: 'Workspace Openers: Specify workspace URIs (comma-separated)',
         store: true,
         when: answers => answers.workspaceOpeners,
-        validate: str => {
-          if (str.trim().length === 0) {
-            return 'You need to specify at least one URI';
-          }
-
-          const workspaceOpeners = str.split(',') || [str];
-
-          workspaceOpeners.forEach(workspaceOpener => {
-            if (!workspaceOpener.startsWith('atom://')) {
-              throw 'You need to specify a valid workspace URI, prefixed with atom://';
-            }
-          });
-
-          return true;
-        }
+        validate: str => validators.workspaceOpener(str)
       },
       {
         type: 'confirm',
@@ -242,48 +259,23 @@ module.exports = class extends Generator {
         message: 'Specify Atom packages (comma-separated)',
         store: true,
         when: answers => answers.atomDependenciesQuestion ? true : false,
-        validate: async str => {
-          if (str.trim().length === 0) {
-            return 'You need to specify at least one package';
-          }
-
-          const packages = str.split(',');
-          const promises = [];
-
-          for (var pkg of packages) {
-            promises.push(axios.get(`https://atom.io/api/packages/${pkg}`));
-          }
-
-          try {
-            await Promise.all(promises); // responses will be an array
-          } catch (err) {
-            return `The package '${pkg}' could not be found`;
-          }
-
-          return true;
-        }
+        validate: async str => await validators.atomDependencies(str)
       },
       {
-        type: 'confirm',
-        name: 'buildWithWebpack',
-        message: 'Build with Webpack',
-        default: true,
-        store: true
-      },
-      {
-        type: 'list',
-        name: 'buildScript',
-        message: 'Build Script',
-        default: 'prepublishOnly',
+        type: 'checkbox',
+        name: 'additionalDependencies',
+        message: 'Specify additional dependencies',
         store: true,
         choices: [
           {
-            name: 'postinstall',
-            value: 'postinstall',
+            name: 'Developer Console',
+            value: '@atxm/developer-console',
+            checked: false
           },
           {
-            name: 'prepublishOnly',
-            value: 'prepublishOnly',
+            name: 'Package Metrics',
+            value: '@atxm/metrics',
+            checked: false
           }
         ]
       },
@@ -295,11 +287,11 @@ module.exports = class extends Generator {
         store: true,
         choices: [
           {
-            name: 'pre-commit',
+            name: this.linkify('pre-commit', 'https://git-scm.com/docs/githooks#_pre_commit'),
             value: 'pre-commit',
           },
           {
-            name: 'pre-push',
+            name: this.linkify('pre-push', 'https://git-scm.com/docs/githooks#_pre_push'),
             value: 'pre-push',
           }
         ]
@@ -311,22 +303,96 @@ module.exports = class extends Generator {
         store: true,
         choices: [
           {
-            name: terminalLink('Circle CI', 'https://circleci.com/', {
-              fallback() {
-                return 'Circle CI';
-              }
-            }),
+            name: this.linkify('Bitbucket Pipelines', 'https://bitbucket.org/product/features/pipelines'),
+            value: 'bitbucketPipelines',
+            checked: false,
+            disabled: answers => !answers.privatePackage
+          },
+          {
+            name: this.linkify('Circle CI', 'https://circleci.com'),
             value: 'circleCI',
             checked: false
           },
           {
-            name: terminalLink('Travis CI', 'https://travis-ci.org/', {
-              fallback() {
-                return 'Travis CI';
-              }
-            }),
+            name: this.linkify('GitHub Actions', 'https://github.com/features/actions'),
+            value: 'githubActions',
+            checked: false
+          },
+          {
+            name: this.linkify('Travis CI', 'https://travis-ci.org'),
             value: 'travisCI',
             checked: false
+          }
+        ]
+      },
+      {
+        type: 'checkbox',
+        name: 'babelPresets',
+        message: 'Babel Presets',
+        store: true,
+        when: answers => answers.language === 'javascript',
+        choices: [
+          {
+            name: this.linkify('Flow', 'https://www.npmjs.com/package/@babel/preset-flow'),
+            value: '@babel/preset-flow'
+          },
+          {
+            name: this.linkify('React', 'https://www.npmjs.com/package/@babel/preset-react'),
+            value: '@babel/preset-react',
+          }
+        ]
+      },
+      {
+        type: 'list',
+        name: 'eslintConfig',
+        message: 'ESLint Configuration',
+        default: 'eslint',
+        store: true,
+        when: answers => answers.language === 'javascript',
+        choices: [
+          {
+            name: this.linkify('Airbnb', 'https://www.npmjs.com/package/eslint-config-airbnb'),
+            value: 'airbnb',
+          },
+          {
+            name: this.linkify('ESLint', 'https://www.npmjs.com/package/eslint-config-eslint'),
+            value: 'eslint',
+          },
+          {
+            name: this.linkify('Google', 'https://www.npmjs.com/package/eslint-config-google'),
+            value: 'google',
+          },
+          {
+            name: this.linkify('Idiomatic', 'https://www.npmjs.com/package/eslint-config-idiomatic'),
+            value: 'idiomatic',
+          },
+          {
+            name: this.linkify('Prettier', 'https://www.npmjs.com/package/eslint-config-prettier'),
+            value: 'prettier',
+          },
+          {
+            name: this.linkify('Semistandard', 'https://www.npmjs.com/package/eslint-config-semistandard'),
+            value: 'semistandard',
+          },
+          {
+            name: this.linkify('Shopify', 'https://www.npmjs.com/package/eslint-config-shopify'),
+            value: 'shopify',
+          },
+          {
+            name: this.linkify('Standard', 'https://www.npmjs.com/package/eslint-config-standard'),
+            value: 'standard',
+          },
+          {
+            name: this.linkify('Vue', 'https://www.npmjs.com/package/eslint-config-vue'),
+            value: 'vue',
+          },
+          {
+            name: this.linkify('WordPress', 'https://www.npmjs.com/package/eslint-config-wordpress'),
+            value: 'wordpress',
+          },
+          {
+            name: this.linkify('XO', 'https://www.npmjs.com/package/eslint-config-xo'),
+            value: 'xo',
           }
         ]
       },
@@ -334,80 +400,44 @@ module.exports = class extends Generator {
         type: 'list',
         name: 'stylelintConfig',
         message: 'Stylelint Configuration',
-        default: 'Recommended',
+        default: 'recommended',
         store: true,
         when: answers => answers.features.includes('styles'),
         choices: [
           {
-            name: terminalLink('Airbnb', 'https://www.npmjs.com/package/stylelint-config-airbnb', {
-              fallback() {
-                return 'Airbnb';
-              }
-            }),
+            name: this.linkify('Airbnb', 'https://www.npmjs.com/package/stylelint-config-airbnb'),
             value: 'airbnb',
           },
           {
-            name: terminalLink('Idiomatic', 'https://www.npmjs.com/package/stylelint-config-idiomatic', {
-              fallback() {
-                return 'Idiomatic';
-              }
-            }),
+            name: this.linkify('Idiomatic', 'https://www.npmjs.com/package/stylelint-config-idiomatic'),
             value: 'idiomatic',
           },
           {
-            name: terminalLink('Prettier', 'https://www.npmjs.com/package/stylelint-config-prettier', {
-              fallback() {
-                return 'Prettier';
-              }
-            }),
+            name: this.linkify('Prettier', 'https://www.npmjs.com/package/stylelint-config-prettier'),
             value: 'prettier',
           },
           {
-            name: terminalLink('Primer', 'https://www.npmjs.com/package/stylelint-config-primer', {
-              fallback() {
-                return 'Primer';
-              }
-            }),
+            name: this.linkify('Primer', 'https://www.npmjs.com/package/stylelint-config-primer'),
             value: 'primer',
           },
           {
-            name: terminalLink('Recommended', 'https://www.npmjs.com/package/stylelint-config-recommended', {
-              fallback() {
-                return 'Recommended';
-              }
-            }),
+            name: this.linkify('Recommended', 'https://www.npmjs.com/package/stylelint-config-recommended'),
             value: 'recommended',
           },
           {
-            name: terminalLink('Shopify', 'https://www.npmjs.com/package/stylelint-config-shopify', {
-              fallback() {
-                return 'Shopify';
-              }
-            }),
+            name: this.linkify('Shopify', 'https://www.npmjs.com/package/stylelint-config-shopify'),
             value: 'shopify',
           },
           {
-            name: terminalLink('Standard', 'https://www.npmjs.com/package/stylelint-config-standard', {
-              fallback() {
-                return 'Standard';
-              }
-            }),
+            name: this.linkify('Standard', 'https://www.npmjs.com/package/stylelint-config-standard'),
             value: 'standard',
           },
           {
-            name: terminalLink('WordPress', 'https://www.npmjs.com/package/stylelint-config-wordpress', {
-              fallback() {
-                return 'WordPress';
-              }
-            }),
+            name: this.linkify('WordPress', 'https://www.npmjs.com/package/stylelint-config-wordpress'),
             value: 'wordpress',
           },
           {
-            name: terminalLink('XO', 'https://www.npmjs.com/package/stylelint-config-xo', {
-              fallback() {
-                return 'XO';
-              }
-            }),
+            name: this.linkify('XO', 'https://www.npmjs.com/package/stylelint-config-xo'),
             value: 'xo',
           }
         ]
@@ -423,21 +453,20 @@ module.exports = class extends Generator {
         name: 'linkDevPackage',
         message: 'Link as developer package?',
         default: 'true',
-        store: true
+        store: false
       },
       {
         type: 'confirm',
         name: 'openInEditor',
         message: 'Open in default editor?',
         default: 'true',
-        store: true,
-        when: () => {
-          return (process.env.EDITOR) ? true : false;
-        }
+        store: false,
+        when: () => process.env.EDITOR ? true : false
       },
-    ]).then(props => {
-      if (this.debugMode) console.log(props);
+    ]).then(async props => {
+      if (this.options.debug) console.log(props);
 
+      props.className = pascalCase(props.name.replace('-', ' '));
       props.licenseURL = spdxLicenseList[props.license].url;
       props.licenseName = spdxLicenseList[props.license].name;
       props.licenseText = spdxLicenseList[props.license].licenseText.replace(/\n{3,}/g, '\n\n');
@@ -450,33 +479,55 @@ module.exports = class extends Generator {
       }
 
       // Copying files
-      props.features.forEach( feature => {
+      props.features.map( feature => {
         mkdirp(feature);
       });
 
-      if (props.features.includes('keymaps')) {
-        this.fs.copyTpl(
-          this.templatePath('keymaps/keymap.json.ejs'),
-          this.destinationPath(`keymaps/${props.name}.json`),
-          {
-            pkg: props
-          }
-        );
-      }
+      if (props.language === 'coffeescript') {
+        if (props.features.includes('keymaps')) {
+          this.fs.copyTpl(
+            this.templatePath('coffeescript/keymaps/keymap.cson.ejs'),
+            this.destinationPath(`keymaps/${props.name}.cson`),
+            {
+              pkg: props
+            }
+          );
+        }
 
-      if (props.features.includes('menus')) {
-        this.fs.copyTpl(
-          this.templatePath('menus/menu.json.ejs'),
-          this.destinationPath(`menus/${props.name}.json`),
-          {
-            pkg: props
-          }
-        );
+        if (props.features.includes('menus')) {
+          this.fs.copyTpl(
+            this.templatePath('coffeescript/menus/menu.cson.ejs'),
+            this.destinationPath(`menus/${props.name}.cson`),
+            {
+              pkg: props
+            }
+          );
+        }
+      } else {
+        if (props.features.includes('keymaps')) {
+          this.fs.copyTpl(
+            this.templatePath('shared/keymaps/keymap.json.ejs'),
+            this.destinationPath(`keymaps/${props.name}.json`),
+            {
+              pkg: props
+            }
+          );
+        }
+
+        if (props.features.includes('menus')) {
+          this.fs.copyTpl(
+            this.templatePath('shared/menus/menu.json.ejs'),
+            this.destinationPath(`menus/${props.name}.json`),
+            {
+              pkg: props
+            }
+          );
+        }
       }
 
       if (props.features.includes('styles')) {
         this.fs.copyTpl(
-          this.templatePath('styles/style.less.ejs'),
+          this.templatePath('shared/styles/style.less.ejs'),
           this.destinationPath(`styles/${props.name}.less`),
           {
             pkg: props
@@ -484,33 +535,45 @@ module.exports = class extends Generator {
         );
       }
 
+      // if (props.additionalDependencies.includes('@atxm/metrics')) {
+      //   props.metricsContructor = `
+      //     new Metrics('UA-XXXX-Y', {
+      //       commandCategory: 'Commands',
+      //       commandAction: [
+      //         '${props.name}:*'
+      //       ]
+      //     });
+      //   `;
+      // }
+
       mkdirp('src');
+
       this.fs.copyTpl(
-        this.templatePath('src/index.ts.ejs'),
-        this.destinationPath(`src/${props.name}.ts`),
+        this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
+        this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
         {
           pkg: props
         }
       );
 
       this.fs.copyTpl(
-        this.templatePath('src/config.ts.ejs'),
-        this.destinationPath(`src/config.ts`),
+        this.templatePath(await getTemplatePath('src/config.ejs', props.language)),
+        this.destinationPath(getDestinationPath('src/config.ejs', props.language)),
         {
           pkg: props
         }
       );
 
       this.fs.copyTpl(
-        this.templatePath('src/hello-world.ts.ejs'),
-        this.destinationPath(`src/hello-world.ts`),
+        this.templatePath(await getTemplatePath('src/hello-world.ejs', props.language)),
+        this.destinationPath(getDestinationPath('src/hello-world.ejs', props.language)),
         {
           pkg: props
         }
       );
 
      this.fs.copyTpl(
-        this.templatePath('README.md.ejs'),
+        this.templatePath('shared/README.md.ejs'),
         this.destinationPath('README.md'),
         {
           pkg: props
@@ -518,56 +581,60 @@ module.exports = class extends Generator {
       );
 
       this.fs.copyTpl(
-        this.templatePath('LICENSE.ejs'),
+        this.templatePath('shared/LICENSE.ejs'),
         this.destinationPath('LICENSE'),
         {
           licenseText: props.licenseText
         }
       );
 
-      props.scriptBuild = (props.buildWithWebpack) ? 'webpack --mode production' : 'tsc --pretty --project ./';
-      props.scriptDev = (props.buildWithWebpack) ? 'webpack --mode none --watch' : 'tsc --watch --pretty --project ./';
-
-      if (props.buildWithWebpack) {
-        this.fs.copyTpl(
-          this.templatePath('webpack.config.js.ejs'),
-          this.destinationPath(`webpack.config.js`),
-          {
-            pkg: props
-          }
-        );
-      }
-
       this.fs.copyTpl(
-        this.templatePath('package.json.ejs'),
-        this.destinationPath('package.json'),
+        this.templatePath(await getTemplatePath('webpack.config.js.ejs', props.language)),
+        this.destinationPath(`webpack.config.js`),
         {
           pkg: props
         }
       );
 
+      if (props.addConfig.includes('bitbucketPipelines')) {
+        this.fs.copy(
+          this.templatePath('shared/ci/bitbucket-pipelines.yml'),
+          this.destinationPath('bitbucket-pipelines.yml')
+        );
+      }
+
       if (props.addConfig.includes('circleCI')) {
         mkdirp('.circleci');
+
         this.fs.copyTpl(
-          this.templatePath('_circleci/config.yml'),
+          this.templatePath('shared/ci/circleci.yml'),
           this.destinationPath('.circleci/config.yml')
+        );
+      }
+
+      if (props.addConfig.includes('githubActions')) {
+        mkdirp('.github/workflows');
+
+        this.fs.copyTpl(
+          this.templatePath('shared/ci/github-actions.yml'),
+          this.destinationPath('.github/workflows/nodejs.yml')
         );
       }
 
       if (props.addConfig.includes('travisCI')) {
         this.fs.copy(
-          this.templatePath('_travis.yml'),
+          this.templatePath('shared/ci/travis.yml'),
           this.destinationPath('.travis.yml')
         );
       }
 
       this.fs.copy(
-        this.templatePath('_editorconfig'),
+        this.templatePath('shared/_editorconfig'),
         this.destinationPath('.editorconfig')
       );
 
       this.fs.copyTpl(
-        this.templatePath('_gitignore'),
+        this.templatePath('shared/_gitignore'),
         this.destinationPath('.gitignore'),
         {
           pkg: props
@@ -576,59 +643,91 @@ module.exports = class extends Generator {
 
       if (props.features.includes('styles')) {
         this.fs.copyTpl(
-          this.templatePath('_stylelintrc.ejs'),
-          this.destinationPath(`.stylelintrc`),
+          this.templatePath('shared/_stylelintrc.ejs'),
+          this.destinationPath('.stylelintrc'),
           {
             pkg: props
           }
         );
       }
 
-      this.fs.copy(
-        this.templatePath('tsconfig.json'),
-        this.destinationPath(`tsconfig.json`)
+      switch (props.language) {
+        case 'coffeescript':
+          this.fs.copy(
+            this.templatePath('coffeescript/_coffeelintignore'),
+            this.destinationPath('.coffeelintignore')
+          );
+
+          this.fs.copy(
+            this.templatePath('coffeescript/coffeelint.json'),
+            this.destinationPath('coffeelint.json')
+          );
+          break;
+
+        case 'javascript':
+          this.fs.copyTpl(
+            this.templatePath('javascript/_babelrc.ejs'),
+            this.destinationPath('.babelrc'),
+            {
+              babelrc: composeBabel(props),
+              indentation: 2
+            }
+          );
+
+          this.fs.copyTpl(
+            this.templatePath('javascript/_eslintrc.ejs'),
+            this.destinationPath('.eslintrc'),
+            {
+              pkg: props
+            }
+          );
+          break;
+
+        case 'typescript':
+              this.fs.copy(
+                this.templatePath('typescript/_eslintrc'),
+                this.destinationPath('.eslintrc')
+              );
+
+              this.fs.copy(
+                this.templatePath('typescript/tsconfig.json'),
+                this.destinationPath('tsconfig.json')
+              );
+          break;
+      }
+
+      // switch (props.eslintConfig) {
+      //   case 'eslint':
+      //     props.indent_style = 'space';
+      //     props.indent_size = 4;
+      //     props.ws = '    ';
+      //     break;
+      //   case 'wordpress':
+      //   case 'xo':
+      //     props.indent_style = 'tab';
+      //     props.ws = '\t';
+      //     break;
+      //   default:
+      //     props.indent_style = 'space';
+      //     props.indent_size = 2;
+      //     props.ws = '  ';
+      //     break;
+      // }
+
+      // Install dependencies
+      this.fs.copyTpl(
+        this.templatePath('shared/package.json.ejs'),
+        this.destinationPath(`package.json`),
+        {
+          manifest: composeManifest(props),
+          indentation: 2
+        }
       );
 
-      this.fs.copy(
-        this.templatePath('.eslintrc'),
-        this.destinationPath(`.eslintrc`)
-      );
+      const [dependencies, devDependencies] = getDependencies(props);
 
-      // Install latest versions of dependencies
-      const dependencies = ['@types/atom', '@types/node', 'typescript'];
-      let devDependencies =[
-        '@typescript-eslint/eslint-plugin',
-        '@typescript-eslint/eslint-plugin-tslint',
-        '@typescript-eslint/parser',
-        'concurrently',
-        'eslint',
-        'husky',
-        'tslint'
-      ];
-
-      if (props.features.includes('styles')) {
-        devDependencies.push(
-          'stylelint',
-          `stylelint-config-${props.stylelintConfig}`
-        );
-      }
-
-      if (props.buildWithWebpack) {
-        devDependencies.push('ts-loader','webpack', 'webpack-cli');
-      }
-
-      if (props.buildScript === 'prepublishOnly') {
-        devDependencies = devDependencies.concat(dependencies)
-        if (typeof props.atomDependencies !== 'undefined' && props.atomDependencies.length > 0) {
-          this.yarnInstall(['atom-package-deps'], { ignoreScripts: true });
-        }
-      } else {
-        if (typeof props.atomDependencies !== 'undefined' && props.atomDependencies.length > 0) {
-          dependencies.push('atom-package-deps');
-        }
-        this.yarnInstall(dependencies, { ignoreScripts: true });
-      }
-      this.yarnInstall(devDependencies, { 'dev': true });
+      if (dependencies.length) this.yarnInstall(dependencies, { ignoreScripts: true });
+      if (devDependencies.length) this.yarnInstall(devDependencies, { 'dev': true });
 
       // Initialize git repository
       if (props.initGit) {

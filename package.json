@@ -1,7 +1,7 @@
 {
-  "name": "@atxm/package-generator",
+  "name": "@atxm/generator-package",
   "version": "0.17.0",
-  "description": "Generator for Atom packages written in TypeScript",
+  "description": "Yeoman generator for Atom packages written in JavaScript, TypeScript or CoffeeScript.",
   "files": [
     "generators"
   ],
@@ -14,12 +14,11 @@
   "keywords": [
     "yeoman-generator",
     "atom",
-    "atom package",
-    "typescript"
+    "atom package"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/a-t-x-m/package-generator"
+    "url": "https://github.com/a-t-x-m/generator"
   },
   "author": "",
   "license": "MIT OR GPL-2.0",
@@ -27,10 +26,14 @@
     "@sindresorhus/slugify": "^0.11.0",
     "axios": "^0.19.2",
     "change-case": "^4.1.1",
+    "pascal-case": "^3.1.1",
+    "pkg-dir": "^4.2.0",
+    "prettier": "^2.0.0",
     "spdx-license-list": "^6.1.0",
     "terminal-link": "^2.1.1",
     "update-notifier": "^4.1.0",
-    "yeoman-generator": "^4.6.0",
+    "util": "^0.12.2",
+    "yeoman-generator": "^4.7.2",
     "yosay": "^2.0.2"
   },
   "devDependencies": {

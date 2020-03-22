@@ -3,7 +3,7 @@ import { helloWorld } from './hello-world';
 
 export { config } from './config';
 
-let subscriptions: CompositeDisposable | undefined
+let subscriptions: CompositeDisposable | undefined;
 
 export async function activate() {
   // Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
@@ -20,5 +20,5 @@ export async function activate() {
 }
 
 export function deactivate() {
-  subscriptions && subscriptions.dispose()
+  subscriptions && subscriptions.dispose();
 }

@@ -1,0 +1,4 @@
+module.exports =
+    helloWorld: ->
+      atom.notifications.addInfo "Hello World!",
+      detail: if atom.inDevMode() then "Package created with CoffeeScript" else undefined

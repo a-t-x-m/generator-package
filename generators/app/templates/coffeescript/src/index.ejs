@@ -1,0 +1,17 @@
+{ CompositeDisposable } = require "atom"
+{ helloWorld } = require "./hello-world"
+{ configSchema } = require "./config"
+
+module.exports = <%= pkg.className %> =
+  config: configSchema
+  subscriptions: null
+
+  activate: (state) ->
+    # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
+    @subscriptions = new CompositeDisposable
+
+    # Register command that displays "Hello World"
+    @subscriptions.add atom.commands.add "atom-workspace", "<%= pkg.name %>:hello-world": -> helloWorld()
+
+  deactivate: ->
+    @subscriptions.dispose()
