@@ -2,8 +2,8 @@
 
 [![npm](https://flat.badgen.net/npm/license/@atxm/generator-package)](https://www.npmjs.org/package/@atxm/generator-package)
 [![npm](https://flat.badgen.net/npm/v/@atxm/generator-package)](https://www.npmjs.org/package/@atxm/generator-package)
-[![CircleCI](https://flat.badgen.net/circleci/github/a-t-x-m/generator)](https://circleci.com/gh/a-t-x-m/generator)
-[![David](https://flat.badgen.net/david/dep/a-t-x-m/generator)](https://david-dm.org/a-t-x-m/generator)
+[![CircleCI](https://flat.badgen.net/circleci/github/a-t-x-m/generator-package)](https://circleci.com/gh/a-t-x-m/generator-package)
+[![David](https://flat.badgen.net/david/dep/a-t-x-m/generator-package)](https://david-dm.org/a-t-x-m/generator-package)
 
 ## Description
 
