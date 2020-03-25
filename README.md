@@ -26,6 +26,7 @@ A [Yeoman](http://yeoman.io/authoring/user-interactions.html) generator for Atom
 - adds any [SPDX](https://spdx.org/licenses/) license
 - adds development scripts
 - adds `activationHooks` / `activationCommands`
+- supports (S)CSS-in-JavaScript
 - supports Babel presets
 - links development packages
 
