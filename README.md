@@ -62,7 +62,7 @@ Next, run the generator and follow its instructions. Use `--help`to list availab
 yo @atxm/package
 ```
 
-*“That's all Folks!”*
+ℹ️ If you prefer graphical user interfaces, [`atom-yeoman`](https://atom.io/packages/atom-yeoman) lets you use this generator within Atom!
 
 ## License
 
