@@ -20,7 +20,7 @@ A [Yeoman](http://yeoman.io/authoring/user-interactions.html) generator for Atom
 - adds CI configurations
   - [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines) (private packages only)
   - [CircleCI](https://circleci.com)
-  - [GitHub Actions](https://github.com/features/actions) (private packages only)
+  - [GitHub Actions](https://github.com/features/actions)
   - [Travis CI](https://travis-ci.org/)
 - adds [Atom package dependencies](https://www.npmjs.com/package/atom-package-deps)
 - adds any [SPDX](https://spdx.org/licenses/) license
