@@ -20,12 +20,13 @@ A [Yeoman](http://yeoman.io/authoring/user-interactions.html) generator for Atom
 - adds CI configurations
   - [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines) (private packages only)
   - [CircleCI](https://circleci.com)
-  - [GitHub Actions](https://github.com/features/actions) (private packages only)
+  - [GitHub Actions](https://github.com/features/actions)
   - [Travis CI](https://travis-ci.org/)
 - adds [Atom package dependencies](https://www.npmjs.com/package/atom-package-deps)
 - adds any [SPDX](https://spdx.org/licenses/) license
 - adds development scripts
 - adds `activationHooks` / `activationCommands`
+- supports (S)CSS-in-JavaScript
 - supports Babel presets
 - links development packages
 
@@ -61,7 +62,7 @@ Next, run the generator and follow its instructions. Use `--help`to list availab
 yo @atxm/package
 ```
 
-*“That's all Folks!”*
+ℹ️ If you prefer graphical user interfaces, [`atom-yeoman`](https://atom.io/packages/atom-yeoman) lets you use this generator within Atom!
 
 ## License
 
