@@ -1,6 +1,6 @@
 {
   "name": "@atxm/generator-package",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Yeoman generator for Atom packages written in JavaScript, TypeScript or CoffeeScript.",
   "files": [
     "generators",
