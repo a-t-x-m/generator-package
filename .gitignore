@@ -4,8 +4,9 @@ node_modules/
 
 # package manager files
 npm-debug.log*
-yarn-error.log
 shrinkwrap.yaml
+yarn-error.log
+yarn.lock
 
 # development
 *.map
