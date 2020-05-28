@@ -714,6 +714,13 @@ module.exports = class extends Generator {
       //     break;
       // }
 
+      if (process.env.EDITOR.endsWith('/code') || process.env.VISUAL.endsWith('/code')) {
+        this.fs.copy(
+          this.templatePath('shared/vscode/tasks.json'),
+          this.destinationPath('.vscode/tasks.json')
+        );
+      }
+
       // Install dependencies
       this.fs.copyTpl(
         this.templatePath('shared/package.json.ejs'),
