@@ -24,10 +24,10 @@ A [Yeoman](http://yeoman.io/authoring/user-interactions.html) generator for Atom
   - [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines) (private packages only)
 - adds [Atom package dependencies](https://www.npmjs.com/package/atom-package-deps)
 - adds [SPDX](https://spdx.org/licenses/) license
-- adds development scripts
 - adds `activationHooks` / `activationCommands`
 - supports loaders for CSS/SCSS
 - supports Babel presets
+- adds development scripts
 - links development packages
 
 ## Prerequisites
