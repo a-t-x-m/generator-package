@@ -11,7 +11,7 @@ A [Yeoman](http://yeoman.io/authoring/user-interactions.html) generator for Atom
 
 **Features**
 
-- scaffolds Atom packages written in JavaScript, TypeScript or CoffeeScript
+- scaffolds Atom packages written in JavaScript, TypeScript or CoffeeScript 2
 - bundles package with Webpack
 - adds linter configurations
   - [CoffeeLint](https://github.com/clutchski/coffeelint)
