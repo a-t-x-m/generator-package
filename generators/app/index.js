@@ -1,9 +1,12 @@
 const Generator = require('yeoman-generator');
 const meta = require('../../package.json');
 
-const { join } = require('path');
+const { join, sep } = require('path');
 const { pascalCase } = require('pascal-case');
+const ejs = require('ejs');
+const fs = require('fs');
 const mkdirp = require('mkdirp');
+const prettier = require("prettier");
 const slugify = require('@sindresorhus/slugify');
 const spdxLicenseList = require('spdx-license-list/full');
 const terminalLink = require('terminal-link');
@@ -16,6 +19,7 @@ const {
   getLicenses,
   getDependencies,
   getDestinationPath,
+  getPrettierConfig,
   getTemplatePath
 } = require('../../lib/helpers');
 
@@ -23,6 +27,19 @@ const validators = require('../../lib/validators');
 
 // Is there a newer version of this generator?
 updateNotifier({ pkg: meta }).notify();
+
+async function copyPrettyTpl(inputFile, outputFile, props) {
+  const template = (
+    await fs.promises.readFile(inputFile)
+  ).toString();
+
+  const unformatted = ejs.render(template, {pkg: props});
+  const formatted = prettier.format(unformatted, {
+    ...getPrettierConfig(props.eslintConfig)
+  });
+
+  await fs.promises.writeFile(outputFile, formatted, 'utf8');
+}
 
 module.exports = class extends Generator {
   constructor(args, opts) {
@@ -270,12 +287,12 @@ module.exports = class extends Generator {
         store: true,
         choices: [
           {
-            name: 'Developer Console',
+            name: this.linkify('Developer Console', 'https://www.npmjs.com/package/@atxm/developer-console'),
             value: '@atxm/developer-console',
             checked: false
           },
           {
-            name: 'Package Metrics',
+            name: this.linkify('Metrics', 'https://www.npmjs.com/package/@atxm/metrics'),
             value: '@atxm/metrics',
             checked: false
           }
@@ -350,7 +367,7 @@ module.exports = class extends Generator {
         message: 'ESLint Configuration',
         default: 'eslint',
         store: true,
-        when: answers => answers.language === 'javascript',
+        when: answers => answers.language !== 'coffeescript',
         choices: [
           {
             name: this.linkify('Airbnb', 'https://www.npmjs.com/package/eslint-config-airbnb'),
@@ -377,20 +394,8 @@ module.exports = class extends Generator {
             value: 'semistandard',
           },
           {
-            name: this.linkify('Shopify', 'https://www.npmjs.com/package/eslint-config-shopify'),
-            value: 'shopify',
-          },
-          {
             name: this.linkify('Standard', 'https://www.npmjs.com/package/eslint-config-standard'),
             value: 'standard',
-          },
-          {
-            name: this.linkify('Vue', 'https://www.npmjs.com/package/eslint-config-vue'),
-            value: 'vue',
-          },
-          {
-            name: this.linkify('WordPress', 'https://www.npmjs.com/package/eslint-config-wordpress'),
-            value: 'wordpress',
           },
           {
             name: this.linkify('XO', 'https://www.npmjs.com/package/eslint-config-xo'),
@@ -427,10 +432,6 @@ module.exports = class extends Generator {
             value: 'recommended',
           },
           {
-            name: this.linkify('Shopify', 'https://www.npmjs.com/package/stylelint-config-shopify'),
-            value: 'shopify',
-          },
-          {
             name: this.linkify('Standard', 'https://www.npmjs.com/package/stylelint-config-standard'),
             value: 'standard',
           },
@@ -451,7 +452,7 @@ module.exports = class extends Generator {
         default: this.fs.exists(join(process.cwd(), '.git', 'config'))
           ? false
           : true,
-        when: () =>  process.env.EDITOR.endsWith('/code') || process.env.VISUAL.endsWith('/code')
+        when: () =>  process.env.EDITOR.includes(`${sep}code`) || process.env.VISUAL.includes(`${sep}code`)
           ? true
           : false
       },
@@ -556,26 +557,33 @@ module.exports = class extends Generator {
         );
       }
 
-      // if (props.additionalDependencies.includes('@atxm/metrics')) {
-      //   props.metricsContructor = `
-      //     new Metrics('UA-XXXX-Y', {
-      //       commandCategory: 'Commands',
-      //       commandAction: [
-      //         '${props.name}:*'
-      //       ]
-      //     });
-      //   `;
-      // }
+      if (props.additionalDependencies.includes('@atxm/metrics')) {
+        props.metricsContructor = props.language === 'coffeescript'
+          ? `new Metrics "UA-XXXX-Y";
+            `
+          : `
+            // Initialize Metrics
+            new Metrics('UA-XXXX-Y');
+          `;
+      }
 
       mkdirp('src');
 
-      this.fs.copyTpl(
-        this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
-        this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
-        {
-          pkg: props
-        }
-      );
+      if (props.language === 'coffeescript') {
+        this.fs.copyTpl(
+          this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
+          this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
+          {
+            pkg: props
+          }
+        );
+      } else {
+        await copyPrettyTpl(
+          this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
+          this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
+          props
+        );
+      }
 
       this.fs.copyTpl(
         this.templatePath(await getTemplatePath('src/config.ejs', props.language)),
@@ -705,9 +713,12 @@ module.exports = class extends Generator {
           break;
 
         case 'typescript':
-              this.fs.copy(
-                this.templatePath('typescript/_eslintrc'),
-                this.destinationPath('.eslintrc')
+              this.fs.copyTpl(
+                this.templatePath('typescript/_eslintrc.ejs'),
+                this.destinationPath('.eslintrc'),
+                {
+                  pkg: props
+                }
               );
 
               this.fs.copy(

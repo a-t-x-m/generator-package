@@ -1,5 +1,6 @@
 import { CompositeDisposable } from 'atom';
 import { helloWorld } from './hello-world';
+<% if (pkg.additionalDependencies.includes('@atxm/metrics')) { -%>import Metrics from '@atxm/metrics';<% } %>
 
 export { config } from './config';
 
@@ -8,6 +9,8 @@ let subscriptions: CompositeDisposable | undefined;
 export async function activate() {
   // Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
   subscriptions = new CompositeDisposable();
+
+  <%- pkg.metricsContructor %>
 
   // Register commands
   subscriptions.add(
