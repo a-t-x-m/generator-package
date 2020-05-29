@@ -275,9 +275,7 @@ module.exports = class extends Generator {
         name: 'atomDependencies',
         message: 'Specify Atom packages (comma-separated)',
         store: true,
-        when: answers => answers.atomDependenciesQuestion
-          ? true
-          : false,
+        when: answers => answers.atomDependenciesQuestion,
         validate: async str => await validators.atomDependencies(str)
       },
       {
@@ -297,6 +295,15 @@ module.exports = class extends Generator {
             checked: false
           }
         ]
+      },
+      {
+        name: 'gaTrackingId',
+        message: 'Specify your Google Analytics Tracking ID',
+        store: true,
+        when: answers => answers.additionalDependencies.includes('@atxm/metrics'),
+        validate: trackingID => /^UA-\d{4,}-\d{1,}/.test(trackingID)
+          ? true
+          : 'Unsupported tracking ID format (should be UA-XXXX-Y)'
       },
       {
         type: 'list',
@@ -559,11 +566,11 @@ module.exports = class extends Generator {
 
       if (props.additionalDependencies.includes('@atxm/metrics')) {
         props.metricsContructor = props.language === 'coffeescript'
-          ? `new Metrics "UA-XXXX-Y";
+          ? `new Metrics "${props.gaTrackingId}";
             `
           : `
             // Initialize Metrics
-            new Metrics('UA-XXXX-Y');
+            new Metrics(${props.gaTrackingId});
           `;
       }
 
