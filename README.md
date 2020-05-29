@@ -18,15 +18,15 @@ A [Yeoman](http://yeoman.io/authoring/user-interactions.html) generator for Atom
   - [ESLint](https://github.com/typescript-eslint/typescript-eslint)
   - [stylelint](https://stylelint.io/)
 - adds CI configurations
-  - [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines) (private packages only)
   - [CircleCI](https://circleci.com)
   - [GitHub Actions](https://github.com/features/actions)
   - [Travis CI](https://travis-ci.org/)
+  - [Bitbucket Pipelines](https://bitbucket.org/product/features/pipelines) (private packages only)
 - adds [Atom package dependencies](https://www.npmjs.com/package/atom-package-deps)
-- adds any [SPDX](https://spdx.org/licenses/) license
+- adds [SPDX](https://spdx.org/licenses/) license
 - adds development scripts
 - adds `activationHooks` / `activationCommands`
-- supports (S)CSS-in-JavaScript
+- supports loaders for CSS/SCSS
 - supports Babel presets
 - links development packages
 
