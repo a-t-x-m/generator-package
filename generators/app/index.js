@@ -258,7 +258,9 @@ module.exports = class extends Generator {
         name: 'atomDependencies',
         message: 'Specify Atom packages (comma-separated)',
         store: true,
-        when: answers => answers.atomDependenciesQuestion ? true : false,
+        when: answers => answers.atomDependenciesQuestion
+          ? true
+          : false,
         validate: async str => await validators.atomDependencies(str)
       },
       {
@@ -444,9 +446,22 @@ module.exports = class extends Generator {
       },
       {
         type: 'confirm',
+        name: 'vscodeTasks',
+        message: 'Create Visual Studio Code tasks?',
+        default: this.fs.exists(join(process.cwd(), '.git', 'config'))
+          ? false
+          : true,
+        when: () =>  process.env.EDITOR.endsWith('/code') || process.env.VISUAL.endsWith('/code')
+          ? true
+          : false
+      },
+      {
+        type: 'confirm',
         name: 'initGit',
         message: 'Initialize Git repository?',
-        default: this.fs.exists(join(process.cwd(), '.git', 'config')) ? false : true
+        default: this.fs.exists(join(process.cwd(), '.git', 'config'))
+          ? false
+          : true
       },
       {
         type: 'confirm',
@@ -461,7 +476,9 @@ module.exports = class extends Generator {
         message: 'Open in default editor?',
         default: 'true',
         store: false,
-        when: () => process.env.EDITOR ? true : false
+        when: () => process.env.EDITOR
+          ? true
+          : false
       },
     ]).then(async props => {
       if (this.options.debug) console.log(props);
@@ -470,8 +487,12 @@ module.exports = class extends Generator {
       props.licenseURL = spdxLicenseList[props.license].url;
       props.licenseName = spdxLicenseList[props.license].name;
       props.licenseText = spdxLicenseList[props.license].licenseText.replace(/\n{3,}/g, '\n\n');
-      props.repositoryName = (props.name.startsWith('atom-')) ? props.name : `atom-${props.name}`;
-      props.lintScript = (props.features.includes('styles')) ? "npm run lint:ts && npm run lint:styles" : "npm run lint:ts";
+      props.repositoryName = (props.name.startsWith('atom-'))
+        ? props.name
+        : `atom-${props.name}`;
+      props.lintScript = (props.features.includes('styles'))
+        ? "npm run lint:ts && npm run lint:styles"
+        : "npm run lint:ts";
 
       if (typeof props.atomDependencies !== 'undefined') {
         props.atomDependencies = props.atomDependencies.split(',');
@@ -714,7 +735,7 @@ module.exports = class extends Generator {
       //     break;
       // }
 
-      if (process.env.EDITOR.endsWith('/code') || process.env.VISUAL.endsWith('/code')) {
+      if (props.vscodeTasks) {
         this.fs.copy(
           this.templatePath('shared/vscode/tasks.json'),
           this.destinationPath('.vscode/tasks.json')
