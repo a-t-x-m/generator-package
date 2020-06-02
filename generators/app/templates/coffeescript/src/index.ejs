@@ -1,6 +1,6 @@
 { CompositeDisposable } = require "atom"
 { helloWorld } = require "./hello-world"
-<% if (pkg.additionalDependencies.includes('@atxm/metrics')) { %>Metrics = require "@atxm/metrics";<% } -%>
+<% if (pkg.additionalDependencies.includes('@atxm/metrics')) { %>Metrics = require "@atxm/metrics";<% } %>
 { configSchema } = require "./config"
 
 module.exports = <%= pkg.className %> =
@@ -11,7 +11,7 @@ module.exports = <%= pkg.className %> =
     # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
     @subscriptions = new CompositeDisposable
 
-    <% pkg.metricsContructor -%>
+    <%- pkg.metricsContructor %>
 
     # Register command that displays "Hello World"
     @subscriptions.add atom.commands.add "atom-workspace", "<%= pkg.name %>:hello-world": -> helloWorld()
