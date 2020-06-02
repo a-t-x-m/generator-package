@@ -475,15 +475,15 @@ module.exports = class extends Generator {
         type: 'confirm',
         name: 'linkDevPackage',
         message: 'Link as developer package?',
-        default: 'true',
-        store: false
+        default: true,
+        store: true
       },
       {
         type: 'confirm',
         name: 'openInEditor',
         message: 'Open in default editor?',
-        default: 'true',
-        store: false,
+        default: true,
+        store: true,
         when: () => process.env.EDITOR
           ? true
           : false
@@ -566,8 +566,7 @@ module.exports = class extends Generator {
 
       if (props.additionalDependencies.includes('@atxm/metrics')) {
         props.metricsContructor = props.language === 'coffeescript'
-          ? `new Metrics "${props.gaTrackingId}";
-            `
+          ? `# Initialize Metrics\n    new Metrics "${props.gaTrackingId}"`
           : `
             // Initialize Metrics
             new Metrics(${props.gaTrackingId});
