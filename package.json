@@ -35,14 +35,14 @@
     "terminal-link": "^2.1.1",
     "update-notifier": "^4.1.0",
     "util": "^0.12.2",
-    "yeoman-generator": "^4.7.2",
+    "yeoman-generator": "^4.11.0",
     "yosay": "^2.0.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "concurrently": "^5.2.0",
     "ejs-lint": "^1.1.0",
-    "eslint": "^7.1.0",
+    "eslint": "^7.4.0",
     "husky": "^4.2.5"
   },
   "husky": {
