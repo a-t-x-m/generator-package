@@ -524,7 +524,7 @@ module.exports = class extends Generator {
       });
 
       if (props.language === 'coffeescript') {
-        if (props.features.includes('keymaps')) {
+        if (props.features.includes('code') && props.features.includes('keymaps')) {
           this.fs.copyTpl(
             this.templatePath('coffeescript/keymaps/keymap.cson.ejs'),
             this.destinationPath(`keymaps/${props.name}.cson`),
@@ -534,7 +534,7 @@ module.exports = class extends Generator {
           );
         }
 
-        if (props.features.includes('menus')) {
+        if (props.features.includes('code') && props.features.includes('menus')) {
           this.fs.copyTpl(
             this.templatePath('coffeescript/menus/menu.cson.ejs'),
             this.destinationPath(`menus/${props.name}.cson`),
@@ -544,7 +544,7 @@ module.exports = class extends Generator {
           );
         }
       } else {
-        if (props.features.includes('keymaps')) {
+        if (props.features.includes('code') && props.features.includes('keymaps')) {
           this.fs.copyTpl(
             this.templatePath('shared/keymaps/keymap.json.ejs'),
             this.destinationPath(`keymaps/${props.name}.json`),
@@ -554,7 +554,7 @@ module.exports = class extends Generator {
           );
         }
 
-        if (props.features.includes('menus')) {
+        if (props.features.includes('code') && props.features.includes('menus')) {
           this.fs.copyTpl(
             this.templatePath('shared/menus/menu.json.ejs'),
             this.destinationPath(`menus/${props.name}.json`),
