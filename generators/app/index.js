@@ -106,27 +106,6 @@ module.exports = class extends Generator {
 
     return this.prompt([
       {
-        type: 'list',
-        name: 'language',
-        message: 'Choose your preferred language',
-        default: 'typescript',
-        store: true,
-        choices: [
-          {
-            name: this.linkify('CoffeeScript', 'https://coffeescript.org'),
-            value: 'coffeescript'
-          },
-          {
-            name: this.linkify('JavaScript', 'https://developer.mozilla.org/en-US/docs/Web/JavaScript'),
-            value: 'javascript'
-          },
-          {
-            name: this.linkify('TypeScript', 'https://www.typescriptlang.org'),
-            value: 'typescript'
-          }
-        ],
-      },
-      {
         name: 'name',
         message: 'What do you want to name your package?',
         default: slugify(this.appname),
@@ -181,6 +160,11 @@ module.exports = class extends Generator {
         store: true,
         choices: [
           {
+            name: 'Code',
+            value: 'code',
+            checked: true
+          },
+          {
             name: 'Grammars',
             value: 'grammars',
             checked: false
@@ -208,10 +192,33 @@ module.exports = class extends Generator {
         ]
       },
       {
+        type: 'list',
+        name: 'language',
+        message: 'Choose your preferred language',
+        default: 'typescript',
+        store: true,
+        choices: [
+          {
+            name: this.linkify('CoffeeScript', 'https://coffeescript.org'),
+            value: 'coffeescript'
+          },
+          {
+            name: this.linkify('JavaScript', 'https://developer.mozilla.org/en-US/docs/Web/JavaScript'),
+            value: 'javascript'
+          },
+          {
+            name: this.linkify('TypeScript', 'https://www.typescriptlang.org'),
+            value: 'typescript'
+          }
+        ],
+        when: answers => answers.features.includes('code')
+      },
+      {
         type: 'confirm',
         name: 'activationCommands',
         message: 'Add activation command?',
-        default: true
+        default: true,
+        when: answers => answers.features.includes('code')
       },
       {
         type: 'checkbox',
@@ -234,20 +241,21 @@ module.exports = class extends Generator {
             value: 'grammar-used',
             checked: false
           }
-        ]
+        ],
+        when: answers => answers.features.includes('code')
       },
       {
         name: 'rootScopeUsed',
         message: 'Activation Hooks: Specify root scope used',
         store: true,
-        when: answers => answers.activationHooks.includes('root-scope-used'),
+        when: answers => answers.features.includes('code') && answers.activationHooks.includes('root-scope-used'),
         validate: str => validators.rootScope(str)
       },
       {
         name: 'grammarUsed',
         message: 'Activation Hooks: Specify grammar used',
         store: true,
-        when: answers => answers.activationHooks.includes('grammar-used'),
+        when: answers => answers.features.includes('code') && answers.activationHooks.includes('grammar-used'),
         validate: str => validators.grammar(str)
       },
       {
@@ -256,6 +264,7 @@ module.exports = class extends Generator {
         message: 'Add workspace openers?',
         store: true,
         default: false,
+        when: answers => answers.features.includes('code')
       },
       {
         name: 'workspaceOpenerURIs',
@@ -269,7 +278,8 @@ module.exports = class extends Generator {
         name: 'atomDependenciesQuestion',
         message: 'Depend on other Atom packages?',
         default: false,
-        store: true
+        store: true,
+        when: answers => answers.features.includes('code')
       },
       {
         name: 'atomDependencies',
@@ -294,13 +304,14 @@ module.exports = class extends Generator {
             value: '@atxm/metrics',
             checked: false
           }
-        ]
+        ],
+        when: answers => answers.features.includes('code')
       },
       {
         name: 'gaTrackingId',
         message: 'Specify your Google Analytics Tracking ID',
         store: true,
-        when: answers => answers.additionalDependencies.includes('@atxm/metrics'),
+        when: answers => answers.features.includes('code') && answers.additionalDependencies.includes('@atxm/metrics'),
         validate: trackingID => /^UA-\d{4,}-\d{1,}/.test(trackingID)
           ? true
           : 'Unsupported tracking ID format (should be UA-XXXX-Y)'
@@ -356,7 +367,7 @@ module.exports = class extends Generator {
         name: 'babelPresets',
         message: 'Babel Presets',
         store: true,
-        when: answers => answers.language === 'javascript',
+        when: answers => answers.features.includes('code') && answers.language === 'javascript',
         choices: [
           {
             name: this.linkify('Flow', 'https://www.npmjs.com/package/@babel/preset-flow'),
@@ -374,7 +385,7 @@ module.exports = class extends Generator {
         message: 'ESLint Configuration',
         default: 'eslint',
         store: true,
-        when: answers => answers.language !== 'coffeescript',
+        when: answers => answers.features.includes('code') && answers.language !== 'coffeescript',
         choices: [
           {
             name: this.linkify('Airbnb', 'https://www.npmjs.com/package/eslint-config-airbnb'),
@@ -499,8 +510,8 @@ module.exports = class extends Generator {
         ? props.name
         : `atom-${props.name}`;
       props.lintScript = (props.features.includes('styles'))
-        ? "npm run lint:ts && npm run lint:styles"
-        : "npm run lint:ts";
+        ? "npm run lint:code && npm run lint:styles"
+        : "npm run lint:code";
 
       if (typeof props.atomDependencies !== 'undefined') {
         props.atomDependencies = props.atomDependencies.split(',');
@@ -564,7 +575,7 @@ module.exports = class extends Generator {
         );
       }
 
-      if (props.additionalDependencies.includes('@atxm/metrics')) {
+      if (props.features.includes('code') && props.additionalDependencies.includes('@atxm/metrics')) {
         props.metricsContructor = props.language === 'coffeescript'
           ? `# Initialize Metrics\n    new Metrics "${props.gaTrackingId}"`
           : `
@@ -575,37 +586,39 @@ module.exports = class extends Generator {
 
       mkdirp('src');
 
-      if (props.language === 'coffeescript') {
+      if (props.features.includes('code')) {
+        if (props.language === 'coffeescript') {
+          this.fs.copyTpl(
+            this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
+            this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
+            {
+              pkg: props
+            }
+          );
+        } else {
+          await copyPrettyTpl(
+            this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
+            this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
+            props
+          );
+        }
+
         this.fs.copyTpl(
-          this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
-          this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
+          this.templatePath(await getTemplatePath('src/config.ejs', props.language)),
+          this.destinationPath(getDestinationPath('src/config.ejs', props.language)),
           {
             pkg: props
           }
         );
-      } else {
-        await copyPrettyTpl(
-          this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
-          this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
-          props
+
+        this.fs.copyTpl(
+          this.templatePath(await getTemplatePath('src/hello-world.ejs', props.language)),
+          this.destinationPath(getDestinationPath('src/hello-world.ejs', props.language)),
+          {
+            pkg: props
+          }
         );
       }
-
-      this.fs.copyTpl(
-        this.templatePath(await getTemplatePath('src/config.ejs', props.language)),
-        this.destinationPath(getDestinationPath('src/config.ejs', props.language)),
-        {
-          pkg: props
-        }
-      );
-
-      this.fs.copyTpl(
-        this.templatePath(await getTemplatePath('src/hello-world.ejs', props.language)),
-        this.destinationPath(getDestinationPath('src/hello-world.ejs', props.language)),
-        {
-          pkg: props
-        }
-      );
 
      this.fs.copyTpl(
         this.templatePath('shared/README.md.ejs'),
@@ -623,13 +636,15 @@ module.exports = class extends Generator {
         }
       );
 
-      this.fs.copyTpl(
-        this.templatePath(await getTemplatePath('webpack.config.js.ejs', props.language)),
-        this.destinationPath(`webpack.config.js`),
-        {
-          pkg: props
-        }
-      );
+      if (props.features.includes('code')) {
+        this.fs.copyTpl(
+          this.templatePath(await getTemplatePath('webpack.config.js.ejs', props.language)),
+          this.destinationPath(`webpack.config.js`),
+          {
+            pkg: props
+          }
+        );
+      }
 
       if (props.addConfig.includes('bitbucketPipelines')) {
         this.fs.copy(
@@ -686,52 +701,54 @@ module.exports = class extends Generator {
         );
       }
 
-      switch (props.language) {
-        case 'coffeescript':
-          this.fs.copy(
-            this.templatePath('coffeescript/_coffeelintignore'),
-            this.destinationPath('.coffeelintignore')
-          );
+      if (props.features.includes('code')) {
+        switch (props.language) {
+          case 'coffeescript':
+            this.fs.copy(
+              this.templatePath('coffeescript/_coffeelintignore'),
+              this.destinationPath('.coffeelintignore')
+            );
 
-          this.fs.copy(
-            this.templatePath('coffeescript/coffeelint.json'),
-            this.destinationPath('coffeelint.json')
-          );
-          break;
+            this.fs.copy(
+              this.templatePath('coffeescript/coffeelint.json'),
+              this.destinationPath('coffeelint.json')
+            );
+            break;
 
-        case 'javascript':
-          this.fs.copyTpl(
-            this.templatePath('javascript/_babelrc.ejs'),
-            this.destinationPath('.babelrc'),
-            {
-              babelrc: composeBabel(props),
-              indentation: 2
-            }
-          );
+          case 'javascript':
+            this.fs.copyTpl(
+              this.templatePath('javascript/_babelrc.ejs'),
+              this.destinationPath('.babelrc'),
+              {
+                babelrc: composeBabel(props),
+                indentation: 2
+              }
+            );
 
-          this.fs.copyTpl(
-            this.templatePath('javascript/_eslintrc.ejs'),
-            this.destinationPath('.eslintrc'),
-            {
-              pkg: props
-            }
-          );
-          break;
+            this.fs.copyTpl(
+              this.templatePath('javascript/_eslintrc.ejs'),
+              this.destinationPath('.eslintrc'),
+              {
+                pkg: props
+              }
+            );
+            break;
 
-        case 'typescript':
-              this.fs.copyTpl(
-                this.templatePath('typescript/_eslintrc.ejs'),
-                this.destinationPath('.eslintrc'),
-                {
-                  pkg: props
-                }
-              );
+          case 'typescript':
+                this.fs.copyTpl(
+                  this.templatePath('typescript/_eslintrc.ejs'),
+                  this.destinationPath('.eslintrc'),
+                  {
+                    pkg: props
+                  }
+                );
 
-              this.fs.copy(
-                this.templatePath('typescript/tsconfig.json'),
-                this.destinationPath('tsconfig.json')
-              );
-          break;
+                this.fs.copy(
+                  this.templatePath('typescript/tsconfig.json'),
+                  this.destinationPath('tsconfig.json')
+                );
+            break;
+        }
       }
 
       // switch (props.eslintConfig) {
@@ -771,7 +788,10 @@ module.exports = class extends Generator {
 
       const [dependencies, devDependencies] = getDependencies(props);
 
-      if (dependencies.length) this.yarnInstall(dependencies, { ignoreScripts: true });
+      if (props.features.includes('code')) {
+        if (dependencies.length) this.yarnInstall(dependencies, { ignoreScripts: true });
+      }
+
       if (devDependencies.length) this.yarnInstall(devDependencies, { 'dev': true });
 
       // Initialize git repository
