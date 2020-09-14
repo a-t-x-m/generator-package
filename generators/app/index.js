@@ -214,6 +214,24 @@ module.exports = class extends Generator {
         when: answers => answers.features.includes('code')
       },
       {
+        type: 'list',
+        name: 'defaultExport',
+        message: 'Default Export',
+        default: 'functions',
+        store: true,
+        choices: [
+          {
+            name: 'Functions',
+            value: 'functions'
+          },
+          {
+            name: 'Class',
+            value: 'class'
+          }
+        ],
+        when: answers => answers.features.includes('code') && ['javascript', 'typescript'].includes(answers.language)
+      },
+      {
         type: 'confirm',
         name: 'activationCommands',
         message: 'Add activation command?',
@@ -361,6 +379,26 @@ module.exports = class extends Generator {
             checked: false
           }
         ]
+      },
+      {
+        type: 'list',
+        name: 'bundler',
+        message: 'Bundler',
+        default: 'webpack',
+        store: true,
+        choices: [
+          {
+            name: this.linkify('Rollup', 'https://rollupjs.org/'),
+            value: 'rollupjs',
+            checked: false
+          },
+          {
+            name: this.linkify('Webpack', 'https://webpack.js.org/'),
+            value: 'webpack',
+            checked: false
+          }
+        ],
+        when: answers => answers.features.includes('code') // && ['javascript', 'typescript'].includes(answers.language)
       },
       {
         type: 'checkbox',
@@ -577,10 +615,10 @@ module.exports = class extends Generator {
 
       if (props.features.includes('code') && props.additionalDependencies.includes('@atxm/metrics')) {
         props.metricsContructor = props.language === 'coffeescript'
-          ? `# Initialize Metrics\n    new Metrics "${props.gaTrackingId}"`
+          ? `# Initialize Metrics\n    Metrics.init "${props.gaTrackingId}"`
           : `
             // Initialize Metrics
-            new Metrics(${props.gaTrackingId});
+            Metrics.init(${props.gaTrackingId});
           `;
       }
 
@@ -597,7 +635,7 @@ module.exports = class extends Generator {
           );
         } else {
           await copyPrettyTpl(
-            this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
+            this.templatePath(await getTemplatePath(`src/index.${props.defaultExport}.ejs`, props.language)),
             this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
             props
           );
@@ -637,9 +675,13 @@ module.exports = class extends Generator {
       );
 
       if (props.features.includes('code')) {
+        const bundlerConfig = props.features.bundler === 'rollup'
+          ? 'rollup'
+          : 'webpack';
+
         this.fs.copyTpl(
-          this.templatePath(await getTemplatePath('webpack.config.js.ejs', props.language)),
-          this.destinationPath(`webpack.config.js`),
+          this.templatePath(await getTemplatePath(`${bundlerConfig}.config.js.ejs`, props.language)),
+          this.destinationPath(`${bundlerConfig}.config.js`),
           {
             pkg: props
           }
