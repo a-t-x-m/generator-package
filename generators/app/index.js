@@ -335,23 +335,6 @@ module.exports = class extends Generator {
           : 'Unsupported tracking ID format (should be UA-XXXX-Y)'
       },
       {
-        type: 'list',
-        name: 'linterHook',
-        message: 'Linter Hook',
-        default: 'pre-commit',
-        store: true,
-        choices: [
-          {
-            name: this.linkify('pre-commit', 'https://git-scm.com/docs/githooks#_pre_commit'),
-            value: 'pre-commit',
-          },
-          {
-            name: this.linkify('pre-push', 'https://git-scm.com/docs/githooks#_pre_push'),
-            value: 'pre-push',
-          }
-        ]
-      },
-      {
         type: 'checkbox',
         name: 'addConfig',
         message: 'Add CI configuration',
