@@ -43,11 +43,15 @@
     "concurrently": "^5.2.0",
     "ejs-lint": "^1.1.0",
     "eslint": "^7.4.0",
-    "husky": "^4.2.5"
+    "husky": "^4.2.5",
+    "lint-staged": "^10.4.0"
+  },
+  "lint-staged": {
+    "./generators/**/*.js": "eslint --fix"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run test"
+      "pre-commit": "lint-staged"
     }
   }
 }
