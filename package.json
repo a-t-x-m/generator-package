@@ -47,6 +47,7 @@
     "lint-staged": "^10.4.0"
   },
   "lint-staged": {
+    "./generators/**/*.ejs": "ejslint",
     "./generators/**/*.js": "eslint --fix"
   },
   "husky": {
