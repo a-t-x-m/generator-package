@@ -716,6 +716,14 @@ module.exports = class extends Generator {
         }
       );
 
+      this.fs.copyTpl(
+        this.templatePath('shared/_gitattributes'),
+        this.destinationPath('.gitattributes'),
+        {
+          pkg: props
+        }
+      );
+
       if (props.features.includes('styles')) {
         this.fs.copyTpl(
           this.templatePath('shared/_stylelintrc.ejs'),
