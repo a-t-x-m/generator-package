@@ -760,7 +760,7 @@ module.exports = class extends Generator {
 
             this.fs.copyTpl(
               this.templatePath('javascript/_eslintrc.ejs'),
-              this.destinationPath('.eslintrc'),
+              this.destinationPath('.eslintrc.cjs'),
               {
                 pkg: props
               }
@@ -770,7 +770,7 @@ module.exports = class extends Generator {
           case 'typescript':
                 this.fs.copyTpl(
                   this.templatePath('typescript/_eslintrc.ejs'),
-                  this.destinationPath('.eslintrc'),
+                  this.destinationPath('.eslintrc.cjs'),
                   {
                     pkg: props
                   }
