@@ -5,7 +5,11 @@ module.exports = {
     browser: true,
     es6: true
   },
-  extends: '<%= pkg.eslintConfig %>',
+  extends: [
+    'plugin:@typescript-eslint/recommended',
+    '<%= pkg.eslintConfig %>',
+    'plugin:json/recommended'
+  ],
   parser: '@typescript-eslint/parser',
   plugins: [
     '@typescript-eslint',

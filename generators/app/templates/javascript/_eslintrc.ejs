@@ -5,7 +5,10 @@ module.exports = {
     browser: true,
     es6: true
   },
-  extends: '<%= pkg.eslintConfig %>',
+  extends: [
+    '<%= pkg.eslintConfig %>'
+    'plugin:json/recommended',
+  ],
   parserOptions: {
     ecmaVersion: 6,
     sourceType: 'module'
