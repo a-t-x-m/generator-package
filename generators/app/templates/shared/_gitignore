@@ -4,10 +4,9 @@ node_modules/
 *npm-debug.log*
 yarn-error.log
 
-# Yeoman
+# Development
+.eslintcache
 .yo-rc.json
-
-# TypeScript
 tsconfig.tsbuildinfo
 
 # Compiled Source
