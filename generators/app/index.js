@@ -214,24 +214,6 @@ module.exports = class extends Generator {
         when: answers => answers.features.includes('code')
       },
       {
-        type: 'list',
-        name: 'defaultExport',
-        message: 'Default Export',
-        default: 'functions',
-        store: true,
-        choices: [
-          {
-            name: 'Functions',
-            value: 'functions'
-          },
-          {
-            name: 'Class',
-            value: 'class'
-          }
-        ],
-        when: answers => answers.features.includes('code') && ['javascript', 'typescript'].includes(answers.language)
-      },
-      {
         type: 'confirm',
         name: 'activationCommands',
         message: 'Add activation command?',
@@ -606,21 +588,11 @@ module.exports = class extends Generator {
       mkdirp('src');
 
       if (props.features.includes('code')) {
-        if (props.language === 'coffeescript') {
-          this.fs.copyTpl(
-            this.templatePath(await getTemplatePath('src/index.ejs', props.language)),
-            this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
-            {
-              pkg: props
-            }
-          );
-        } else {
-          await copyPrettyTpl(
-            this.templatePath(await getTemplatePath(`src/index.${props.defaultExport}.ejs`, props.language)),
-            this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
-            props
-          );
-        }
+        await copyPrettyTpl(
+          this.templatePath(await getTemplatePath(`src/index.ejs`, props.language)),
+          this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
+          props
+        );
 
         this.fs.copyTpl(
           this.templatePath(await getTemplatePath('src/config.ejs', props.language)),
