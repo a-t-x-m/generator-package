@@ -384,13 +384,17 @@ module.exports = class extends Generator {
         type: 'list',
         name: 'eslintConfig',
         message: 'ESLint Configuration',
-        default: 'recommended',
+        default: 'eslint',
         store: true,
         when: answers => answers.features.includes('code') && answers.language !== 'coffeescript',
         choices: [
           {
             name: this.linkify('Airbnb', 'https://www.npmjs.com/package/eslint-config-airbnb'),
             value: 'airbnb',
+          },
+          {
+            name: this.linkify('ESLint', 'https://www.npmjs.com/package/eslint-config-eslint'),
+            value: 'eslint',
           },
           {
             name: this.linkify('Google', 'https://www.npmjs.com/package/eslint-config-google'),
@@ -403,10 +407,6 @@ module.exports = class extends Generator {
           {
             name: this.linkify('Prettier', 'https://www.npmjs.com/package/eslint-config-prettier'),
             value: 'prettier',
-          },
-          {
-            name: this.linkify('Recommended', 'https://www.npmjs.com/package/eslint-config-recommended'),
-            value: 'recommended',
           },
           {
             name: this.linkify('Semistandard', 'https://www.npmjs.com/package/eslint-config-semistandard'),
