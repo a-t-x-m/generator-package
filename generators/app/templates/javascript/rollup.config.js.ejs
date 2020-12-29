@@ -1,0 +1,35 @@
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { terser } from "rollup-plugin-terser";
+import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
+
+const plugins = [
+  commonjs(),
+  json(),
+  nodeResolve({
+    preferBuiltins: true
+  }),
+  (
+    process.env.ROLLUP_WATCH
+      ? undefined
+      : terser()
+  )
+];
+
+export default [
+  {
+    input: 'src/<%= name %>.js',
+    output: {
+      dir: 'lib',
+      exports: 'default',
+      format: 'cjs',
+      sourcemap: true
+    },
+    external: [
+      // Atom
+      'atom',
+      'electron'
+    ],
+    plugins: plugins
+  }
+];

@@ -6,6 +6,7 @@ yarn-error.log
 
 # Development
 .eslintcache
+.rollup.cache/
 .yo-rc.json
 tsconfig.tsbuildinfo
 

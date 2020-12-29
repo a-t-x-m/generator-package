@@ -372,16 +372,14 @@ module.exports = class extends Generator {
         choices: [
           {
             name: this.linkify('Rollup', 'https://rollupjs.org/'),
-            value: 'rollupjs',
-            checked: false
+            value: 'rollup'
           },
           {
             name: this.linkify('Webpack', 'https://webpack.js.org/'),
-            value: 'webpack',
-            checked: false
+            value: 'webpack'
           }
         ],
-        when: answers => answers.features.includes('code') // && ['javascript', 'typescript'].includes(answers.language)
+        when: answers => answers.features.includes('code') && ['javascript', 'typescript'].includes(answers.language)
       },
       {
         type: 'checkbox',
@@ -658,15 +656,15 @@ module.exports = class extends Generator {
       );
 
       if (props.features.includes('code')) {
-        const bundlerConfig = props.features.bundler === 'rollup'
-          ? 'rollup'
-          : 'webpack';
+        const bundlerConfig = props.bundler === 'rollup'
+          ? 'rollup.config.js'
+          : 'webpack.config.js';
 
         this.fs.copyTpl(
-          this.templatePath(await getTemplatePath(`${bundlerConfig}.config.js.ejs`, props.language)),
-          this.destinationPath(`${bundlerConfig}.config.js`),
+          this.templatePath(await getTemplatePath(`${bundlerConfig}.ejs`, props.language)),
+          this.destinationPath(bundlerConfig),
           {
-            pkg: props
+            name: props.name
           }
         );
       }
