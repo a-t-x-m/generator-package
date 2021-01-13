@@ -5,11 +5,11 @@ pipelines:
           name: Node LTS
           image: node:lts
           script:
-            - npm install
+            - npm ci
             - npm run test
       - step:
           name: Node (latest)
           image: node:latest
           script:
-            - npm install
+            - npm ci
             - npm run test

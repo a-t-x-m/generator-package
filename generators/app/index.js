@@ -751,10 +751,10 @@ module.exports = class extends Generator {
                   }
                 );
 
-                this.fs.copy(
-                  this.templatePath('typescript/tsconfig.json'),
-                  this.destinationPath('tsconfig.json')
-                );
+                // this.fs.copy(
+                //   this.templatePath('typescript/tsconfig.json'),
+                //   this.destinationPath('tsconfig.json')
+                // );
             break;
         }
       }
