@@ -750,11 +750,6 @@ module.exports = class extends Generator {
                     pkg: props
                   }
                 );
-
-                // this.fs.copy(
-                //   this.templatePath('typescript/tsconfig.json'),
-                //   this.destinationPath('tsconfig.json')
-                // );
             break;
         }
       }
@@ -776,6 +771,11 @@ module.exports = class extends Generator {
       //     props.ws = '  ';
       //     break;
       // }
+
+      this.fs.copy(
+        this.templatePath('shared/_husky'),
+        this.destinationPath('.husky/pre-commit')
+      );
 
       if (props.vscodeTasks) {
         this.fs.copy(
