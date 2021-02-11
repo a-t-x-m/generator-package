@@ -305,7 +305,7 @@ module.exports = class extends Generator {
             checked: false
           }
         ],
-        when: answers => answers.features.includes('code')
+        when: answers => answers.features.includes('code') && answers.language !== 'coffeescript'
       },
       {
         name: 'gaTrackingId',
