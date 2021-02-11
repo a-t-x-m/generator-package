@@ -9,7 +9,7 @@
   "scripts": {
     "lint:ejs": "ejslint generators/**/*.ejs",
     "lint:js": "eslint generators/**/*.js",
-    "lint": "npm-run-all --parallel lint:*'",
+    "lint": "npm-run-all --parallel lint:*",
     "release": "np'",
     "test": "npm run lint"
   },
