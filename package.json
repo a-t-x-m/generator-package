@@ -10,6 +10,7 @@
     "lint:ejs": "ejslint generators/**/*.ejs",
     "lint:js": "eslint generators/**/*.js",
     "lint": "npm-run-all --parallel lint:*",
+    "postinstall": "husky install",
     "release": "np",
     "test": "npm run lint"
   },
