@@ -349,7 +349,7 @@ module.exports = class extends Generator {
         type: 'list',
         name: 'bundler',
         message: 'Bundler',
-        default: 'webpack',
+        default: 'rollup',
         store: true,
         choices: [
           {
