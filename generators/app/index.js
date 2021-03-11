@@ -389,6 +389,10 @@ module.exports = class extends Generator {
         when: answers => answers.features.includes('code') && answers.language !== 'coffeescript',
         choices: [
           {
+            name: this.linkify('Atom IDE Community', 'https://www.npmjs.com/package/eslint-config-atomic'),
+            value: 'atomic',
+          },
+          {
             name: this.linkify('Airbnb', 'https://www.npmjs.com/package/eslint-config-airbnb'),
             value: 'airbnb',
           },
