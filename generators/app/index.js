@@ -521,7 +521,7 @@ module.exports = class extends Generator {
 
       // Copying files
       props.features.map( feature => {
-        mkdirp(feature);
+        if (feature !== 'code') mkdirp(feature);
       });
 
       if (props.language === 'coffeescript') {
