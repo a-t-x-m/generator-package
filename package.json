@@ -40,7 +40,7 @@
     "terminal-link": "^2.1.1",
     "update-notifier": "^5.0.9",
     "util": "^0.12.2",
-    "yeoman-generator": "^4.11.0",
+    "yeoman-generator": ">=4.11 <5",
     "yosay": "^2.0.2"
   },
   "devDependencies": {
