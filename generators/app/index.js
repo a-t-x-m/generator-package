@@ -747,6 +747,11 @@ module.exports = class extends Generator {
             break;
 
           case 'typescript':
+                this.fs.copy(
+                  this.templatePath('typescript/tsconfig.json'),
+                  this.destinationPath('tsconfig.json')
+                );
+
                 this.fs.copyTpl(
                   this.templatePath('typescript/_eslintrc.ejs'),
                   this.destinationPath('.eslintrc.cjs'),
