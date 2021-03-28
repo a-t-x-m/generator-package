@@ -2,12 +2,16 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { terser } from "rollup-plugin-terser";
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
+import scss from 'rollup-plugin-scss'
 
 const plugins = [
   commonjs(),
   json(),
   nodeResolve({
     preferBuiltins: true
+  }),
+  scss({
+    output: false
   }),
   (
     process.env.ROLLUP_WATCH
