@@ -5,13 +5,9 @@ import { helloWorld } from './hello-world';
 
 export default {
   config: configSchema,
-  subscriptions: null,
+  subscriptions: new CompositeDisposable(),
 
   async activate(): {
-    // Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
-    this.subscriptions = new CompositeDisposable();
-
-
     // Register commands
     this.subscriptions.add(
       atom.commands.add('atom-workspace', {
