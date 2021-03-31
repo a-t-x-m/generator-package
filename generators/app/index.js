@@ -5,7 +5,6 @@ const { join, sep } = require('path');
 const { pascalCase } = require('pascal-case');
 const ejs = require('ejs');
 const fs = require('fs');
-const mkdirp = require('mkdirp');
 const prettier = require("prettier");
 const slugify = require('@sindresorhus/slugify');
 const spdxLicenseList = require('spdx-license-list/full');
@@ -522,9 +521,9 @@ module.exports = class extends Generator {
       }
 
       // Copying files
-      props.features.map( feature => {
-        if (feature !== 'code') mkdirp(feature);
-      });
+      await Promise.all(props.features.map( async feature => {
+        if (feature !== 'code') await fs.promises.mkdir(feature, {recursive: true});
+      }));
 
       if (props.language === 'coffeescript') {
         if (props.features?.includes('code') && props.features?.includes('keymaps')) {
@@ -587,7 +586,7 @@ module.exports = class extends Generator {
           `;
       }
 
-      mkdirp('src');
+      fs.promises.mkdir('src', {recursive: true});
 
       if (props.features?.includes('code')) {
         if (props.language === 'coffeescript') {
@@ -661,7 +660,7 @@ module.exports = class extends Generator {
       }
 
       if (props.addConfig?.includes('circleCI')) {
-        mkdirp('.circleci');
+        await fs.promises.mkdir('.circleci', {recursive: true});
 
         this.fs.copyTpl(
           this.templatePath('shared/ci/circleci.yml'),
@@ -670,7 +669,7 @@ module.exports = class extends Generator {
       }
 
       if (props.addConfig?.includes('githubActions')) {
-        mkdirp('.github/workflows');
+        await fs.promises.mkdir('.github/workflows', {recursive: true});
 
         this.fs.copyTpl(
           this.templatePath('shared/ci/github-actions.yml'),
