@@ -13,7 +13,7 @@ yarn.lock
 .eslintrc
 .gitattributes
 .gitignore
-.husky
+.husky/
 *.map
 tsconfig.tsbuildinfo
 
