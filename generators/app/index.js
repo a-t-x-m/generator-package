@@ -717,10 +717,6 @@ module.exports = class extends Generator {
 
       if (props.features?.includes('code')) {
 
-        props.eslintConfig = props.eslintConfig === 'eslint'
-          ? 'eslint:recommended'
-          : props.eslintConfig;
-
         switch (props.language) {
           case 'coffeescript':
             this.fs.copy(
