@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",
+    "@babel/preset-env": "^7.13.12",
     "ejs-lint": "^1.1.0",
     "eslint": "^7.4.0",
     "husky": "^6.0.0",
