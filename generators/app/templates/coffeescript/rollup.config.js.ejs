@@ -1,0 +1,46 @@
+import { babel } from '@rollup/plugin-babel';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { terser } from "rollup-plugin-terser";
+import coffeescript from 'rollup-plugin-coffee-script';
+import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
+import scss from 'rollup-plugin-scss'
+
+const plugins = [
+  babel({
+    extensions: ['.cjs', '.js', '.jsx', '.mjs', '.coffee'],
+    babelHelpers: 'bundled',
+  }),
+  commonjs(),
+  json(),
+  nodeResolve({
+    preferBuiltins: true
+  }),
+  (
+    process.env.ROLLUP_WATCH
+      ? undefined
+      : terser()
+  ),
+  scss({
+    output: false
+  }),
+  coffeescript()
+];
+
+export default [
+  {
+    input: 'src/<%= name %>.ts',
+    output: {
+      dir: 'lib',
+      exports: 'default',
+      format: 'cjs',
+      sourcemap: true
+    },
+    external: [
+      // Atom
+      'atom',
+      'electron'
+    ],
+    plugins: plugins
+  }
+];
