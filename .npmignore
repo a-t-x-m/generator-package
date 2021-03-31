@@ -1,0 +1,21 @@
+# package managers
+bower_components/
+node_modules/
+npm-debug.log*
+shrinkwrap.yaml
+yarn-error.log
+yarn.lock
+
+# development
+.circleci/
+.editorconfig
+.eslintcache
+.eslintrc
+.gitattributes
+.gitignore
+.husky
+*.map
+tsconfig.tsbuildinfo
+
+# Yeoman
+.yo-rc.json
