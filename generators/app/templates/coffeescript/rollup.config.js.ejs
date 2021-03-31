@@ -6,14 +6,20 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import scss from 'rollup-plugin-scss'
 
+const extensions = ['.cjs', '.js', '.jsx', '.mjs', '.coffee'];
+
 const plugins = [
+  coffeescript(),
   babel({
-    extensions: ['.cjs', '.js', '.jsx', '.mjs', '.coffee'],
+    extensions: extensions,
     babelHelpers: 'bundled',
   }),
-  commonjs(),
+  commonjs({
+    extensions: extensions
+  }),
   json(),
   nodeResolve({
+    extensions: extensions,
     preferBuiltins: true
   }),
   (
@@ -23,13 +29,12 @@ const plugins = [
   ),
   scss({
     output: false
-  }),
-  coffeescript()
+  })
 ];
 
 export default [
   {
-    input: 'src/<%= name %>.ts',
+    input: 'src/<%= name %>.coffee',
     output: {
       dir: 'lib',
       exports: 'default',
