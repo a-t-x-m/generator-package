@@ -732,15 +732,6 @@ module.exports = class extends Generator {
 
           case 'javascript':
             this.fs.copyTpl(
-              this.templatePath('javascript/_babelrc.ejs'),
-              this.destinationPath('.babelrc'),
-              {
-                babelrc: composeBabel(props),
-                indentation: 2
-              }
-            );
-
-            this.fs.copyTpl(
               this.templatePath('javascript/_eslintrc.ejs'),
               this.destinationPath('.eslintrc.cjs'),
               {
@@ -766,6 +757,17 @@ module.exports = class extends Generator {
             }
             break;
         }
+      }
+
+      if (['javascript', 'typescript'].includes(props.language)) {
+        this.fs.copyTpl(
+          this.templatePath(`${props.language}/_babelrc.ejs`),
+          this.destinationPath('.babelrc'),
+          {
+            babelrc: composeBabel(props),
+            indentation: 2
+          }
+        );
       }
 
       // switch (props.eslintConfig) {
