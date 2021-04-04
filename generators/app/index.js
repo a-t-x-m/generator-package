@@ -232,6 +232,24 @@ module.exports = class extends Generator {
         when: answers => answers.features?.includes('code')
       },
       {
+        type: 'list',
+        name: 'packageManager',
+        message: 'Package Manager',
+        default: 'npm',
+        store: true,
+        choices: [
+          {
+            name: this.linkify('npm', 'https://www.npmjs.com/get-npm'),
+            value: 'npm'
+          },
+          {
+            name: this.linkify('Yarn', 'https://yarnpkg.com/'),
+            value: 'yarn'
+          }
+        ],
+        when: answers => answers.features?.includes('code')
+      },
+      {
         type: 'confirm',
         name: 'activationCommands',
         message: 'Add activation command?',
@@ -811,12 +829,13 @@ module.exports = class extends Generator {
       );
 
       const [dependencies, devDependencies] = getDependencies(props);
+      const installApi = `${props.packageManager}Install`;
 
       if (props.features?.includes('code')) {
-        if (dependencies.length) this.yarnInstall(dependencies, { ignoreScripts: true });
+        if (dependencies.length) this[installApi](dependencies, { ignoreScripts: true });
       }
 
-      if (devDependencies.length) this.yarnInstall(devDependencies, { 'dev': true });
+      if (devDependencies.length) this[installApi](devDependencies, { 'dev': true });
 
       // Initialize git repository
       if (props.initGit) {
