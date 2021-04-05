@@ -3,7 +3,7 @@ import configSchema from './config';
 import { helloWorld } from './hello-world';
 <% if (pkg.additionalDependencies.includes('@atxm/metrics')) { -%>import Metrics from '@atxm/metrics';<% } %>
 
-export default {
+const <%= pkg.className %> = {
   config: configSchema,
   subscriptions: new CompositeDisposable(),
 
@@ -24,3 +24,5 @@ export default {
     this.subscriptions?.dispose();
   }
 };
+
+export default <%= pkg.className %>;
