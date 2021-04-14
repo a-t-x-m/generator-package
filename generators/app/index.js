@@ -711,7 +711,9 @@ module.exports = class extends Generator {
         this.templatePath('shared/_gitignore'),
         this.destinationPath('.gitignore'),
         {
-          pkg: props
+          foreignLockfile: props.packageManager === 'yarn'
+            ? 'package-lock-json'
+            : 'yarn.lock'
         }
       );
 
@@ -719,7 +721,7 @@ module.exports = class extends Generator {
         this.templatePath('shared/_gitattributes'),
         this.destinationPath('.gitattributes'),
         {
-          pkg: props
+          foreign: props
         }
       );
 
