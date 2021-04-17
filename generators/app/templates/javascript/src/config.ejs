@@ -1,3 +1,35 @@
-const configSchema = {};
+import { name }from '../package.json';
 
-export default configSchema;
+export default {
+  schema: {},
+
+  get(key = '') {
+    return key?.length
+      ? atom.config.get(`${name}.${key}`)
+      : atom.config.get(`${name}`);
+  },
+
+  migrate(oldKey, newKey) {
+    if (!atom.config.get(`${name}.${oldKey}`) || atom.config.get(`${name}.${newKey}`)) {
+      return;
+    }
+
+    try {
+      atom.config.set(`${name}.${newKey}`, atom.config.get(`${name}.${oldKey}`));
+    } catch (error) {
+      atom.notifications.addWarning(`Failed to migrate configuration, see console for details`);
+
+      return;
+    }
+
+    atom.config.unset(`${name}.${oldKey}`);
+  },
+
+  unset(key = '') {
+    const unsetKey = key?.length
+      ? `${name}.${key}`
+      : name;
+
+      atom.config.unset(unsetKey);
+  }
+}

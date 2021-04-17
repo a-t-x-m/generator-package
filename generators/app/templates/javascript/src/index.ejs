@@ -1,10 +1,10 @@
 import { CompositeDisposable } from 'atom';
-import configSchema from './config';
+import config from './config';
 import { helloWorld } from './hello-world';
 <% if (pkg.additionalDependencies.includes('@atxm/metrics')) { %>import Metrics from '@atxm/metrics';<% } %>
 
 const <%= pkg.className %> {
-  config: configSchema,
+  config: config.schema,
   subscriptions: new CompositeDisposable(),
 
   async activate() {
