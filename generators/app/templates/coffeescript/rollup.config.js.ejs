@@ -6,6 +6,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import scss from 'rollup-plugin-scss'
 
+const production = !process.env.ROLLUP_WATCH;
 const extensions = ['.cjs', '.js', '.jsx', '.mjs', '.coffee'];
 
 const plugins = [
@@ -22,11 +23,7 @@ const plugins = [
     extensions: extensions,
     preferBuiltins: true
   }),
-  (
-    process.env.ROLLUP_WATCH
-      ? undefined
-      : terser()
-  ),
+  production && terser(),
   scss({
     output: false
   })
@@ -38,7 +35,7 @@ export default [
     output: {
       dir: 'lib',
       format: 'cjs',
-      sourcemap: true
+      sourcemap: production ? false : true
     },
     external: [
       // Atom
