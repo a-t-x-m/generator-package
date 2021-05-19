@@ -19,13 +19,13 @@ commands:
             - ./node_modules
       - run:
           name: Linting Source
-          command: npm run lint
+          command: npm run lint --if-present
       - run:
           name: Building Source
-          command: npm run build
+          command: npm run build --if-present
       - run:
           name: Running Tests
-          command: npm run test
+          command: npm run test --if-present
 
 jobs:
   node-current:
