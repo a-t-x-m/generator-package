@@ -1,15 +1,24 @@
+clone:
+  depth: 1
+
+definitions:
+  steps:
+    - step: &node-scripts
+        name: Test
+        caches:
+            - node
+        script:
+          - npm ci
+          - npm run test
+
 pipelines:
   default:
     - parallel:
       - step:
+          <<: *node-scripts
           name: Node LTS
           image: node:lts
-          script:
-            - npm ci
-            - npm run test
       - step:
+          <<: *node-scripts
           name: Node (latest)
           image: node:latest
-          script:
-            - npm ci
-            - npm run test
