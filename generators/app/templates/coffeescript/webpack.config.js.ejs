@@ -5,10 +5,10 @@ const path = require('path');
 const config = {
   target: 'node',
 
-  entry: './src/<%= name %>.coffee',
+  entry: './src/main.coffee',
   output: {
     path: path.resolve(__dirname, 'lib'),
-    filename: '<%= name %>.js',
+    filename: 'main.js',
     libraryTarget: 'commonjs2',
     devtoolModuleFilenameTemplate: '../[resource-path]'
   },

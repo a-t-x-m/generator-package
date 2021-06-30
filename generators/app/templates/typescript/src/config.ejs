@@ -32,5 +32,15 @@ export default {
       : name;
 
     atom.config.unset(unsetKey);
+  },
+
+  async open(options = {}): Promise<void> {
+    options = {
+      pending: true,
+      searchAllPanes: true,
+      ...options,
+    };
+
+    await atom.workspace.open(`atom://config/packages/${name}`, options);
   }
 }

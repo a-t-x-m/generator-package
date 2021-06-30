@@ -609,16 +609,16 @@ module.exports = class extends Generator {
       if (props.features?.includes('code')) {
         if (props.language === 'coffeescript') {
           this.fs.copyTpl(
-            this.templatePath('coffeescript/src/index.ejs'),
-            this.destinationPath(`src/${props.name}.coffee`),
+            this.templatePath('coffeescript/src/main.ejs'),
+            this.destinationPath(`src/main.coffee`),
             {
               pkg: props
             }
           );
         } else {
           await copyPrettyTpl(
-            this.templatePath(await getTemplatePath(`src/index.ejs`, props.language)),
-            this.destinationPath(getDestinationPath(`src/${props.name}.ejs`, props.language)),
+            this.templatePath(await getTemplatePath(`src/main.ejs`, props.language)),
+            this.destinationPath(getDestinationPath(`src/main.ejs`, props.language)),
             props
           );
         }
@@ -661,12 +661,9 @@ module.exports = class extends Generator {
           ? 'rollup.config.js'
           : 'webpack.config.js';
 
-        this.fs.copyTpl(
+        this.fs.copy(
           this.templatePath(await getTemplatePath(`${bundlerConfig}.ejs`, props.language)),
-          this.destinationPath(bundlerConfig),
-          {
-            name: props.name
-          }
+          this.destinationPath(bundlerConfig)
         );
       }
 
